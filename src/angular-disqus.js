@@ -86,8 +86,8 @@
      * @param {String} url disqus url
      * @param {String} shortname disqus shortname
      */
-    function setGlobals(id, url, shortname) {
-      window.disqus_identifier = id;
+    function setGlobals(url, shortname) {
+      window.disqus_identifier = url;
       window.disqus_url        = url;
       window.disqus_shortname  = shortname;
     }
@@ -104,15 +104,14 @@
 
     /**
      * Trigger the reset comment call
-     * @param  {String} $location location service
-     * @param  {String} id Thread id
+     * @param  {String} url Thread id
      */
-    function resetCommit($location, id) {
+    function resetCommit(url) {
       window.DISQUS.reset({
         reload: true,
         config : function() {
-          this.page.identifier = id;
-          this.page.url        = $location.absUrl();
+          this.page.identifier = url;
+          this.page.url        = url;
         }
       });
     }
@@ -159,19 +158,19 @@
        * If disqus was not defined then it will add disqus to script tags.
        * If disqus was initialized earlier then it will just use disqus api to reset it
        *
-       * @param  {String} id required thread id
+       * @param  {String} url required thread id
        */
-      function commit(id) {
+      function commit(url) {
         var shortname = getShortname();
 
         if (!angular.isDefined(shortname)) {
           throw new Error('No disqus shortname defined');
-        } else if (!angular.isDefined(id)) {
-          throw new Error('No disqus thread id defined');
+        } else if (!angular.isDefined(url)) {
+          throw new Error('No disqus thread url defined');
         } else if (angular.isDefined(window.DISQUS)) {
-          resetCommit($location, id);
+          resetCommit(url);
         } else {
-          setGlobals(id, $location.absUrl(), shortname);
+          setGlobals(url, shortname);
           addScriptTag(shortname, TYPE_EMBED);
         }
       }
@@ -182,10 +181,10 @@
        *
        * If the embed disqus is not added to page then adds that.
        *
-       * @param {String} id thread id
+       * @param {String} url and thread id
        */
-      function loadCount(id) {
-        setGlobals(id, $location.absUrl(), shortname);
+      function loadCount(url) {
+        setGlobals(url, shortname);
         addScriptTag(getShortname(), TYPE_EMBED);
         addScriptTag(getShortname(), TYPE_COUNT);
         getCount();
@@ -210,13 +209,13 @@
       restrict : 'AC',
       replace  : true,
       scope    : {
-        id : '=disqus',
+        url : '=disqus',
       },
       template : '<div id="disqus_thread"></div>',
       link: function link(scope) {
-        scope.$watch('id', function(id) {
-          if (angular.isDefined(id)) {
-            $disqus.commit(id);
+        scope.$watch('url', function(url) {
+          if (angular.isDefined(url)) {
+            $disqus.commit(url);
           }
         });
       }
