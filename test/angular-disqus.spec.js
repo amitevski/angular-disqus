@@ -106,6 +106,18 @@ describe('Angular-disqus', function() {
         expect($window.disqus_shortname).toEqual('shortname');
         expect($window.disqus_identifier).toEqual('http://www.test.com/234');
         expect($window.disqus_url).toEqual('http://www.test.com/234');
+        expect($window.disqus_title).toEqual(undefined);
+      }));
+      
+      
+      it('should write title to window', inject(function($disqus, $window) {
+        $disqusProvider.setShortname('shortname');
+        $disqus.commit('http://www.test.com/234', 'Test');
+
+        expect($window.disqus_shortname).toEqual('shortname');
+        expect($window.disqus_identifier).toEqual('http://www.test.com/234');
+        expect($window.disqus_url).toEqual('http://www.test.com/234');
+        expect($window.disqus_title).toEqual('Test');
       }));
 
       it ('should reset the thread with correct url', inject(function($disqus, $window, $location) {
@@ -240,7 +252,15 @@ describe('Angular-disqus', function() {
         $disqus.commit = jasmine.createSpy('commit call spy');
         compileHtml('<div disqus="\'test-id\'"></div>');
 
-        expect($disqus.commit).toHaveBeenCalledWith('test-id');
+        expect($disqus.commit).toHaveBeenCalledWith('test-id', undefined);
+      }));
+      
+      
+      it('should use title in commit if title is defined', inject(function($disqus) {
+        $disqus.commit = jasmine.createSpy('commit call spy');
+        compileHtml('<div disqus="\'test-id\'" title="\'Test Title\'"></div>');
+
+        expect($disqus.commit).toHaveBeenCalledWith('test-id', 'Test Title');
       }));
 
       it('should trigger commit if url changes', inject(function($window, $disqus, $rootScope) {
@@ -251,7 +271,7 @@ describe('Angular-disqus', function() {
         $rootScope.url = 'http://www.test.com/456';
         $rootScope.$apply();
 
-        expect($disqus.commit).toHaveBeenCalledWith('http://www.test.com/456');
+        expect($disqus.commit).toHaveBeenCalledWith('http://www.test.com/456', undefined);
       }));
     });
 

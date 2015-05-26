@@ -86,8 +86,9 @@
      * @param {String} url disqus url
      * @param {String} shortname disqus shortname
      */
-    function setGlobals(url, shortname) {
+    function setGlobals(url, shortname, title) {
       window.disqus_identifier = url;
+      window.disqus_title = title;
       window.disqus_url        = url;
       window.disqus_shortname  = shortname;
     }
@@ -106,12 +107,13 @@
      * Trigger the reset comment call
      * @param  {String} url Thread id
      */
-    function resetCommit(url) {
+    function resetCommit(url, title) {
       window.DISQUS.reset({
         reload: true,
         config : function() {
           this.page.identifier = url;
           this.page.url        = url;
+          this.page.title        = title;
         }
       });
     }
@@ -157,10 +159,12 @@
        * Resets the comment for thread.
        * If disqus was not defined then it will add disqus to script tags.
        * If disqus was initialized earlier then it will just use disqus api to reset it
+       * If no title is specified <title> tag will be used
        *
        * @param  {String} url required thread id
+       * @param  {String} titlel optional
        */
-      function commit(url) {
+      function commit(url, title) {
         var shortname = getShortname();
 
         if (!angular.isDefined(shortname)) {
@@ -168,9 +172,9 @@
         } else if (!angular.isDefined(url)) {
           throw new Error('No disqus thread url defined');
         } else if (angular.isDefined(window.DISQUS)) {
-          resetCommit(url);
+          resetCommit(url, title);
         } else {
-          setGlobals(url, shortname);
+          setGlobals(url, shortname, title);
           addScriptTag(shortname, TYPE_EMBED);
         }
       }
@@ -210,12 +214,13 @@
       replace  : true,
       scope    : {
         url : '=disqus',
+        title : '=title',
       },
       template : '<div id="disqus_thread"></div>',
       link: function link(scope) {
         scope.$watch('url', function(url) {
           if (angular.isDefined(url)) {
-            $disqus.commit(url);
+            $disqus.commit(url, scope.title);
           }
         });
       }
